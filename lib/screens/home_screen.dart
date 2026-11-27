@@ -1,6 +1,7 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hadjisaid_mobprog/constant.dart';
 import 'package:hadjisaid_mobprog/screens/newsfeed_screen.dart';
+import 'package:hadjisaid_mobprog/screens/notification_screen.dart';
 import 'package:hadjisaid_mobprog/widgets/custom_text.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -17,51 +18,61 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         shadowColor: fbTextColorWhite,
         elevation: 2,
         title: CustomText(
-          text: 'Facebook',
+          text: _selectedIndex == 0 ? 'Facebook' : 'Notifications',
           fontSize: ScreenUtil().setSp(25),
-          color: fbPrimary,
+          color: _selectedIndex == 0 ? fbPrimary : Colors.black,
           fontWeight: FontWeight.w700,
         ),
       ),
 
       body: PageView(
         controller: _pageController,
-        children: const <Widget>[NewsfeedScreen()],
         onPageChanged: (page) {
           setState(() {
             _selectedIndex = page;
           });
         },
+        children: const [
+          NewsfeedScreen(),
+          NotificationScreen(),
+        ],
       ),
 
       bottomNavigationBar: BottomNavigationBar(
-        showUnselectedLabels: false,
+        currentIndex: _selectedIndex,
+        selectedItemColor: fbPrimary,
         showSelectedLabels: false,
-        onTap: _onTappedBar,
+        showUnselectedLabels: false,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+
+          _pageController.jumpToPage(index);
+        },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
             label: 'Notifications',
           ),
         ],
-        selectedItemColor: fbPrimary,
-        currentIndex: _selectedIndex,
       ),
     );
-  }
-
-  void _onTappedBar(int value) {
-    setState(() {
-      _selectedIndex = value;
-    });
-
-    _pageController.jumpToPage(value);
   }
 }
